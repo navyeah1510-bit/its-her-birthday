@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Riruru's Birthday Quest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF6EC;
+    --pink:#FFD6E5;
+    --pink-deep:#FF93B8;
+    --lavender:#E4D9FF;
+    --mint:#C9F3E1;
+    --gold:#FFC978;
+    --plum:#4A3450;
+    --plum-soft:#7A6485;
+    --shadow-pink: rgba(255,147,184,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;
+    overflow:hidden;
+    font-family:'Quicksand',sans-serif;
+    background:linear-gradient(180deg,var(--cream) 0%, #FFEAD9 100%);
+    color:var(--plum);
+    -webkit-user-select:none;user-select:none;
+  }
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    overflow:hidden;
+  }
+  .screen{
+    position:absolute;top:0;left:0;
+    width:100%;height:100%;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    text-align:center;
+  }
+  .screen.active{display:flex;}
+
+  h1,h2,h3{
+    font-family:'Baloo 2', cursive;
+    margin:0 0 8px 0;
+    color:var(--plum);
+  }
+  .subtitle{
+    font-size:1.15rem;
+    color:var(--plum-soft);
+    margin-bottom:6px;
+  }
+
+  /* ---------- Background ambience ---------- */
+  .cloud{
+    position:absolute;
+    top:var(--y,10%);
+    left:-220px;
+    width:180px;height:70px;
+    background:#fff;
+    border-radius:100px;
+    opacity:0.85;
+    filter: drop-shadow(0 6px 0 rgba(255,214,229,0.5));
+    animation: driftCloud var(--dur,40s) linear infinite;
+    animation-delay: var(--delay,0s);
+    z-index:0;
+  }
+  .cloud::before, .cloud::after{
+    content:'';
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+  }
+  .cloud::before{width:90px;height:90px;top:-40px;left:20px;}
+  .cloud::after{width:110px;height:110px;top:-55px;left:90px;}
+  @keyframes driftCloud{
+    from{transform:translateX(0);}
+    to{transform:translateX(calc(100vw + 300px));}
+  }
+
+  .walk-cat{
+    position:absolute;
+    bottom:var(--gy,6%);
+    left:-60px;
+    font-size:2.2rem;
+    animation: walkAcross var(--wdur,18s) linear infinite;
+    animation-delay:var(--wdelay,0s);
+    z-index:1;
+    transform: scaleX(1);
+  }
+  @keyframes walkAcross{
+    0%{transform:translateX(0) scaleX(1);}
+    49%{transform:translateX(calc(100vw + 80px)) scaleX(1);}
+    50%{transform:translateX(calc(100vw + 80px)) scaleX(-1);}
+    99%{transform:translateX(0) scaleX(-1);}
+    100%{transform:translateX(0) scaleX(1);}
+  }
+
+  .paw{
+    position:absolute;
+    font-size:1.1rem;
+    opacity:0;
+    color:var(--pink-deep);
+    animation: floatPaw 6s ease-in infinite;
+    z-index:0;
+  }
+  @keyframes floatPaw{
+    0%{opacity:0; transform:translateY(0) rotate(0deg);}
+    10%{opacity:0.55;}
+    90%{opacity:0.35;}
+    100%{opacity:0; transform:translateY(-90vh) rotate(25deg);}
+  }
+
+  /* ---------- Music toggle ---------- */
+  #musicBtn{
+    position:absolute;
+    top:16px;right:16px;
+    z-index:50;
+    background:#fff;
+    border:2px solid var(--pink-deep);
+    color:var(--pink-deep);
+    border-radius:50%;
+    width:48px;height:48px;
+    font-size:1.3rem;
+    cursor:pointer;
+    box-shadow:0 4px 10px var(--shadow-pink);
+    transition:transform 0.2s;
+  }
+  #musicBtn:hover{transform:scale(1.08);}
+  #musicBtn.playing{background:var(--pink-deep);color:#fff;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:'Baloo 2', cursive;
+    font-size:1.2rem;
+    background:var(--pink-deep);
+    color:#fff;
+    border:none;
+    padding:16px 38px;
+    border-radius:50px;
+    cursor:pointer;
+    box-shadow:0 8px 0 #E06E96, 0 12px 18px var(--shadow-pink);
+    transition: transform 0.12s ease;
+    margin-top:18px;
+  }
+  .btn:active{transform:translateY(6px); box-shadow:0 2px 0 #E06E96, 0 4px 10px var(--shadow-pink);}
+  .btn.secondary{
+    background:var(--lavender);
+    color:var(--plum);
+    box-shadow:0 8px 0 #C7B4F5, 0 12px 18px rgba(200,180,255,0.3);
+  }
+  .btn.secondary:active{box-shadow:0 2px 0 #C7B4F5;}
+  .btn:disabled{opacity:0.5;cursor:default;}
+
+  /* ---------- Home screen ---------- */
+  #screen-home .cake-hero{
+    font-size:4.5rem;
+    animation: bob 2.4s ease-in-out infinite;
+    cursor:pointer;
+    z-index:2;
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0) rotate(-2deg);}
+    50%{transform:translateY(-14px) rotate(2deg);}
+  }
+  #screen-home h1{
+    font-size:2.6rem;
+    z-index:2;
+  }
+  .mission-box{
+    background:rgba(255,255,255,0.75);
+    border:2px dashed var(--pink-deep);
+    border-radius:24px;
+    padding:16px 26px;
+    margin:14px 0 6px 0;
+    max-width:420px;
+    z-index:2;
+  }
+
+  .moon{
+    position:absolute;
+    top:22px; left:22px;
+    font-size:2rem;
+    cursor:pointer;
+    z-index:5;
+    filter:drop-shadow(0 0 10px rgba(255,255,255,0.8));
+  }
+
+  /* ---------- Find 7 screen ---------- */
+  #find7-field{
+    position:relative;
+    width:min(560px,92vw);
+    height:min(430px,58vh);
+    background:#fff8f2;
+    border-radius:28px;
+    border:3px solid var(--pink);
+    overflow:hidden;
+    box-shadow: inset 0 0 30px rgba(255,193,214,0.4);
+  }
+  .f7-item{
+    position:absolute;
+    font-size:1.9rem;
+    user-select:none;
+  }
+  .f7-seven{
+    font-size:0.85rem;
+    color:#f7c9d6;
+    opacity:0.9;
+    cursor:pointer;
+    transform:rotate(8deg);
+    z-index:5;
+  }
+  .shake{ animation: screenShake 0.5s; }
+  @keyframes screenShake{
+    0%,100%{transform:translate(0,0);}
+    20%{transform:translate(-8px,4px);}
+    40%{transform:translate(8px,-4px);}
+    60%{transform:translate(-6px,-4px);}
+    80%{transform:translate(6px,4px);}
+  }
+  .found-banner{
+    font-family:'Baloo 2',cursive;
+    font-size:2rem;
+    color:var(--pink-deep);
+    margin-top:10px;
+    opacity:0;
+  }
+  .found-banner.show{
+    opacity:1;
+    animation: popIn 0.5s ease;
+  }
+  @keyframes popIn{
+    0%{transform:scale(0.4);opacity:0;}
+    60%{transform:scale(1.15);opacity:1;}
+    100%{transform:scale(1);}
+  }
+
+  /* ---------- Wheel ---------- */
+  #wheelWrap{
+    position:relative;
+    width:min(300px,70vw); height:min(300px,70vw);
+    margin:20px 0;
+  }
+  #wheel{
+    width:100%;height:100%;
+    border-radius:50%;
+    border:8px solid #fff;
+    box-shadow:0 10px 24px var(--shadow-pink);
+    transition: transform 4.5s cubic-bezier(.17,.67,.24,1);
+    background: conic-gradient(
+      var(--pink) 0deg 60deg,
+      var(--mint) 60deg 120deg,
+      var(--lavender) 120deg 180deg,
+      var(--gold) 180deg 240deg,
+      #FFB4C6 240deg 300deg,
+      #B9E3FF 300deg 360deg
+    );
+    position:relative;
+  }
+  .wheel-label{
+    position:absolute;
+    width:100%;height:100%;
+    top:0;left:0;
+    font-size:1.5rem;
+  }
+  .wheel-label span{
+    position:absolute;
+    left:50%;top:14%;
+    transform-origin:0 130px;
+    transform: translate(-50%,0) rotate(var(--ang)) ;
+  }
+  #wheelPointer{
+    position:absolute;
+    top:-16px;left:50%;
+    transform:translateX(-50%);
+    font-size:2rem;
+    z-index:5;
+  }
+  #wheelResult{
+    font-family:'Baloo 2',cursive;
+    font-size:1.4rem;
+    min-height:2.4rem;
+    color:var(--plum);
+  }
+
+  /* ---------- Adventure levels ---------- */
+  .grid-objects{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:14px;
+    margin:14px 0;
+  }
+  .grid-objects button{
+    font-size:2rem;
+    background:#fff;
+    border:2px solid var(--pink);
+    border-radius:16px;
+    padding:10px;
+    cursor:pointer;
+    transition: transform 0.15s;
+  }
+  .grid-objects button:hover{transform:scale(1.08); border-color:var(--pink-deep);}
+  .wrong-shake{ animation: screenShake 0.4s; }
+
+  #catchArea{
+    position:relative;
+    width:min(520px,92vw);
+    height:min(360px,50vh);
+    background:#eafff5;
+    border-radius:24px;
+    border:3px solid var(--mint);
+    overflow:hidden;
+  }
+  .falling{
+    position:absolute;
+    top:-40px;
+    font-size:1.8rem;
+    cursor:pointer;
+  }
+  #rivalCat{
+    position:absolute;
+    bottom:4px;
+    font-size:2rem;
+    transition: left 0.4s ease;
+  }
+  #catchHUD{
+    display:flex;gap:26px;
+    font-family:'Baloo 2',cursive;
+    margin-bottom:8px;
+  }
+
+  #mazeGrid{
+    display:grid;
+    gap:3px;
+    margin:14px 0;
+  }
+  .maze-cell{
+    width:34px;height:34px;
+    background:#fff;
+    border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.1rem;
+  }
+  .maze-wall{background:var(--plum-soft);}
+  .maze-goal{background:var(--gold);}
+  .maze-player{background:var(--pink);}
+
+  #bowlLane{
+    position:relative;
+    width:min(320px,80vw); height:min(420px,54vh);
+    margin:14px auto 6px auto;
+    background:linear-gradient(180deg,#f4e3c9 0%,#e8cfa3 100%);
+    border-radius:18px;
+    border:3px solid var(--gold);
+    overflow:hidden;
+    box-shadow: inset 0 0 20px rgba(122,90,50,0.25);
+  }
+  #bowlLane::before{
+    content:'';
+    position:absolute;
+    left:50%; top:0; bottom:0;
+    width:2px;
+    background:rgba(122,90,50,0.25);
+    transform:translateX(-50%);
+  }
+  .pin{
+    position:absolute;
+    top:var(--py,10%);
+    left:var(--px,50%);
+    transform:translateX(-50%);
+    font-size:1.6rem;
+    transition: opacity 0.3s ease, transform 0.5s ease;
+  }
+  .pin.down{
+    opacity:0;
+    transform:translateX(-50%) rotate(90deg) scale(0.8);
+  }
+  #bowlBall{
+    position:absolute;
+    bottom:6%;
+    left:50%;
+    font-size:1.8rem;
+    transform:translateX(-50%);
+    transition: left 0.25s ease, bottom 1.1s cubic-bezier(.3,.6,.4,1);
+  }
+  #bowlControls{
+    display:flex;gap:14px;justify-content:center;margin-top:12px;
+  }
+  #bowlScore{
+    font-family:'Baloo 2',cursive;
+    font-size:1.3rem;
+    margin-top:6px;
+  }
+
+  #bossArea{
+    position:relative;
+    width:min(560px,92vw);
+    height:min(220px,34vh);
+    background:linear-gradient(180deg,#fff,#ffe9d9);
+    border-radius:24px;
+    border:3px solid var(--gold);
+    overflow:hidden;
+  }
+  #kitten{
+    position:absolute;
+    bottom:14px; left:4%;
+    font-size:2.4rem;
+    transition:left 0.25s ease;
+  }
+  #bossCake{
+    position:absolute;
+    bottom:14px; right:4%;
+    font-size:2.6rem;
+  }
+  .obstacle{
+    position:absolute;
+    bottom:14px;
+    font-size:1.6rem;
+  }
+
+  /* ---------- Ending ---------- */
+  #screen-ending{background:radial-gradient(circle at 50% 30%, #2b1f3d 0%, #17101f 75%); overflow-y:auto; justify-content:flex-start; padding-top:40px; padding-bottom:60px;}
+  #screen-ending h1, #screen-ending h2, #screen-ending p{color:#fff;}
+  .star{
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+    opacity:0.8;
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:0.2;}
+    50%{opacity:1;}
+  }
+  #endCat{
+    font-size:3.5rem;
+    animation: floatIn 1.4s ease forwards;
+    opacity:0;
+  }
+  @keyframes floatIn{
+    from{opacity:0; transform:translateY(40px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  #endHeart{
+    font-size:2.6rem;
+    opacity:0;
+    margin-top:6px;
+  }
+  #endHeart.show{
+    animation: heartPulse 1.1s ease forwards;
+  }
+  @keyframes heartPulse{
+    0%{opacity:0; transform:scale(0.3);}
+    60%{opacity:1; transform:scale(1.3);}
+    100%{opacity:1; transform:scale(1);}
+  }
+  #bigBirthday{
+    font-family:'Baloo 2',cursive;
+    font-size:2.1rem;
+    opacity:0;
+    margin-top:10px;
+    background: linear-gradient(90deg,#FFD6E5,#FFC978,#C9F3E1,#E4D9FF);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  #bigBirthday.show{ animation: popIn 0.7s ease forwards; }
+  #letterBox{
+    margin-top:22px;
+    margin-bottom:20px;
+    max-width:480px;
+    width:92vw;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.25);
+    border-radius:18px;
+    padding:20px 24px;
+    color:#fdeef4;
+    font-size:1.02rem;
+    line-height:1.6;
+    min-height:120px;
+    white-space:pre-line;
+    text-align:left;
+    opacity:0;
+  }
+  #letterBox.show{opacity:1; transition:opacity 0.6s;}
+
+  .heart-float{
+    position:absolute;
+    font-size:1.4rem;
+    color:#FF93B8;
+    opacity:0.9;
+    animation: heartFloat 4s linear forwards;
+  }
+  @keyframes heartFloat{
+    0%{transform:translateY(0) translateX(0); opacity:0.9;}
+    100%{transform:translateY(-70vh) translateX(var(--dx,20px)); opacity:0;}
+  }
+
+  .confetti-piece{
+    position:absolute;
+    top:-20px;
+    width:9px;height:14px;
+    opacity:0.9;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    to{ transform: translateY(110vh) rotate(600deg); opacity:0.3; }
+  }
+
+  .firework{
+    position:absolute;
+    width:5px;height:5px;
+    border-radius:50%;
+  }
+
+  /* ---------- Easter egg overlays ---------- */
+  .rainbow-mode{
+    animation: rainbowFilter 4s linear infinite;
+  }
+  @keyframes rainbowFilter{
+    0%{filter:hue-rotate(0deg);}
+    100%{filter:hue-rotate(360deg);}
+  }
+  .cat-rain-item{
+    position:absolute;
+    top:-40px;
+    font-size:1.8rem;
+    animation: catRainFall linear forwards;
+  }
+  @keyframes catRainFall{
+    to{ transform: translateY(110vh) rotate(40deg); }
+  }
+  .riruru-mode *{
+    cursor: default;
+  }
+  .riruru-sparkle{
+    position:absolute;
+    font-size:1.2rem;
+    pointer-events:none;
+    animation: sparkleFade 1s ease forwards;
+  }
+  @keyframes sparkleFade{
+    0%{opacity:1; transform:scale(0.5) translateY(0);}
+    100%{opacity:0; transform:scale(1.2) translateY(-30px);}
+  }
+  .flame{
+    display:inline-block;
+    animation: flicker 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes flicker{
+    0%{opacity:0.7; transform:scale(0.95);}
+    100%{opacity:1; transform:scale(1.08);}
+  }
+
+  .progress-track{
+    display:flex;gap:8px;margin-bottom:6px;
+  }
+  .progress-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--pink);
+  }
+  .progress-dot.done{background:var(--pink-deep);}
+
+  footer-note{display:none;}
+
+  @media (prefers-reduced-motion: reduce){
+    .cloud,.walk-cat,.paw,.cake-hero,.confetti-piece,.heart-float{animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ambience layer, always present -->
+  <div id="ambience"></div>
+
+  <button id="musicBtn" title="Toggle music">🎵</button>
+  <div class="moon" id="moonEl" title="???">🌙</div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="cake-hero" id="homeCake">🎂</div>
+    <h1>Happy Birthday, Riruru!</h1>
+    <p class="subtitle">Welcome to your birthday quest!</p>
+    <div class="mission-box">
+      Your mission is simple...<br>
+      Find the <strong>Lucky Number 7</strong>. 🍀
+    </div>
+    <button class="btn" id="startBtn">🐾 Start Adventure</button>
+  </div>
+
+  <!-- FIND 7 -->
+  <div class="screen" id="screen-find7">
+    <h2>🔎 Find the Lucky 7</h2>
+    <p class="subtitle">It's hiding somewhere in here... look closely!</p>
+    <div id="find7-field"></div>
+    <div class="found-banner" id="foundBanner"></div>
+  </div>
+
+  <!-- WHEEL -->
+  <div class="screen" id="screen-wheel">
+    <h2>🎰 The Lucky Wheel</h2>
+    <p class="subtitle">Let's see what destiny has in store...</p>
+    <div id="wheelWrap">
+      <div id="wheelPointer">🔻</div>
+      <div id="wheel">
+        <div class="wheel-label" id="wheelLabels"></div>
+      </div>
+    </div>
+    <button class="btn" id="spinBtn">Spin the Wheel</button>
+    <div id="wheelResult"></div>
+  </div>
+
+  <!-- ADVENTURE -->
+  <div class="screen" id="screen-adventure">
+    <div class="progress-track" id="progressTrack"></div>
+    <div id="adventureContent"></div>
+  </div>
+
+  <!-- ENDING -->
+  <div class="screen" id="screen-ending">
+    <div id="endCat">🐈</div>
+    <p id="endLine" style="opacity:0;">I have something for you...</p>
+    <div id="endHeart">❤️</div>
+    <div id="bigBirthday">🎉 HAPPY BIRTHDAY RIRURU 🎉</div>
+    <div id="letterBox"></div>
+  </div>
+
+</div>
+
+<script>
+/* ============ UTIL ============ */
+const stage = document.getElementById('stage');
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function showScreen(id){
+  $$('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ============ AMBIENCE: clouds, walking cats, paw prints ============ */
+const ambience = document.getElementById('ambience');
+
+function makeClouds(n){
+  for(let i=0;i<n;i++){
+    const c = document.createElement('div');
+    c.className='cloud';
+    c.style.setProperty('--y', rand(4,30)+'%');
+    c.style.setProperty('--dur', rand(28,55)+'s');
+    c.style.setProperty('--delay', (-rand(0,40))+'s');
+    ambience.appendChild(c);
+  }
+}
+makeClouds(4);
+
+const catFaces = ['🐈','🐈‍⬛','🐱'];
+function makeWalkingCats(n){
+  for(let i=0;i<n;i++){
+    const c = document.createElement('div');
+    c.className='walk-cat';
+    c.textContent = pick(catFaces);
+    c.style.setProperty('--gy', rand(3,14)+'%');
+    c.style.setProperty('--wdur', rand(14,26)+'s');
+    c.style.setProperty('--wdelay', (-rand(0,20))+'s');
+    ambience.appendChild(c);
+  }
+}
+makeWalkingCats(3);
+
+function spawnPaw(){
+  const p = document.createElement('div');
+  p.className='paw';
+  p.textContent='🐾';
+  p.style.left = rand(4,96)+'vw';
+  p.style.bottom = '0px';
+  p.style.fontSize = rand(0.8,1.5)+'rem';
+  ambience.appendChild(p);
+  setTimeout(()=>p.remove(), 6200);
+}
+setInterval(spawnPaw, 900);
+for(let i=0;i<5;i++) setTimeout(spawnPaw, i*300);
+
+/* ============ MUSIC (tiny procedural chiptune) ============ */
+let audioCtx=null, musicPlaying=false, musicTimer=null;
+const melody = [523.25,587.33,659.25,523.25,659.25,783.99,880.00,783.99,659.25,587.33,523.25,587.33,659.25,587.33,523.25,0];
+let noteIdx=0;
+function playNote(freq){
+  if(!freq) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type='triangle';
+  o.frequency.value=freq;
+  g.gain.value=0.0001;
+  o.connect(g); g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime;
+  g.gain.exponentialRampToValueAtTime(0.06, t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+0.32);
+  o.start(t); o.stop(t+0.34);
+}
+function toggleMusic(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  musicPlaying = !musicPlaying;
+  const btn = document.getElementById('musicBtn');
+  btn.classList.toggle('playing', musicPlaying);
+  if(musicPlaying){
+    audioCtx.resume();
+    musicTimer = setInterval(()=>{
+      playNote(melody[noteIdx % melody.length]);
+      noteIdx++;
+    }, 240);
+  } else {
+    clearInterval(musicTimer);
+  }
+}
+document.getElementById('musicBtn').addEventListener('click', toggleMusic);
+
+/* ============ CONFETTI / FIREWORKS / HEARTS ============ */
+const confettiColors = ['#FF93B8','#FFC978','#C9F3E1','#E4D9FF','#FFD6E5','#B9E3FF'];
+function burstConfetti(count=80, container=stage){
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left = rand(0,100)+'vw';
+    p.style.background = pick(confettiColors);
+    p.style.animationDuration = rand(2.2,4)+'s';
+    p.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+    container.appendChild(p);
+    setTimeout(()=>p.remove(), 4200);
+  }
+}
+function spawnHearts(count=18, container=stage){
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const h = document.createElement('div');
+      h.className='heart-float';
+      h.textContent = pick(['❤️','💕','💗','💖']);
+      h.style.left = rand(5,95)+'vw';
+      h.style.bottom = '0px';
+      h.style.setProperty('--dx', rand(-40,40)+'px');
+      container.appendChild(h);
+      setTimeout(()=>h.remove(), 4200);
+    }, i*160);
+  }
+}
+function fireworkBurst(x,y,container){
+  const colors = confettiColors;
+  const color = pick(colors);
+  for(let i=0;i<24;i++){
+    const f = document.createElement('div');
+    f.className='firework';
+    f.style.left=x+'px'; f.style.top=y+'px';
+    f.style.background=color;
+    const ang = (Math.PI*2*i)/24;
+    const dist = rand(60,140);
+    f.style.transition='all 0.9s ease-out';
+    container.appendChild(f);
+    requestAnimationFrame(()=>{
+      f.style.left=(x+Math.cos(ang)*dist)+'px';
+      f.style.top=(y+Math.sin(ang)*dist)+'px';
+      f.style.opacity='0';
+    });
+    setTimeout(()=>f.remove(),950);
+  }
+}
+function fireworksShow(rounds=6, container=stage){
+  let i=0;
+  const t = setInterval(()=>{
+    fireworkBurst(rand(80,window.innerWidth-80), rand(60,window.innerHeight*0.5), container);
+    i++;
+    if(i>=rounds) clearInterval(t);
+  }, 550);
+}
+
+/* ============ HOME -> FIND 7 ============ */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  showScreen('screen-find7');
+  buildFind7();
+});
+
+const decorEmoji = ['🐟','🧶','🌸','🐾','🪴','😴','📕','📗','🪟','🎀','🐈','🌼','🧵','🍰'];
+function buildFind7(){
+  const field = document.getElementById('find7-field');
+  field.innerHTML='';
+  document.getElementById('foundBanner').className='found-banner';
+  document.getElementById('foundBanner').textContent='';
+  const w = field.clientWidth || 500, h = field.clientHeight || 400;
+
+  // scatter decorative objects
+  for(let i=0;i<26;i++){
+    const it = document.createElement('div');
+    it.className='f7-item';
+    it.textContent = pick(decorEmoji);
+    it.style.left = rand(2, w-40)+'px';
+    it.style.top = rand(2, h-40)+'px';
+    it.style.transform = 'rotate('+rand(-20,20)+'deg)';
+    it.style.opacity = rand(0.55,1);
+    field.appendChild(it);
+  }
+  // the hidden 7 - small, pale, tucked in a corner-ish spot, disguised near a plant
+  const seven = document.createElement('div');
+  seven.className='f7-item f7-seven';
+  seven.textContent='7';
+  const cornerSpots = [
+    {l: w-46, t: h-40},
+    {l: 14, t: h-38},
+    {l: w-40, t: 12},
+    {l: 10, t: 10}
+  ];
+  const spot = pick(cornerSpots);
+  seven.style.left = spot.l+'px';
+  seven.style.top = spot.t+'px';
+  field.appendChild(seven);
+
+  // a decorative plant right next to it so it visually blends in
+  const plant = document.createElement('div');
+  plant.className='f7-item';
+  plant.textContent='🪴';
+  plant.style.left = (spot.l-26)+'px';
+  plant.style.top = (spot.t+6)+'px';
+  field.appendChild(plant);
+
+  seven.addEventListener('click', onFound7);
+}
+
+function onFound7(){
+  const field = document.getElementById('find7-field');
+  field.classList.add('shake');
+  burstConfetti(60);
+  const banner = document.getElementById('foundBanner');
+  banner.textContent = 'YOU FOUND IT! MEOW!! 🐾';
+  banner.classList.add('show');
+  setTimeout(()=>field.classList.remove('shake'), 550);
+  setTimeout(()=>{
+    showScreen('screen-wheel');
+    buildWheel();
+  }, 1800);
+}
+
+/* ============ WHEEL ============ */
+const wheelSegments = [
+  {label:'Fish', emoji:'🐟'},
+  {label:'Flower', emoji:'🌸'},
+  {label:'Funny Cat', emoji:'😹'},
+  {label:'Cake', emoji:'🎂'},
+  {label:'Secret', emoji:'💌'},
+  {label:'Adventure', emoji:'✨'}
+];
+let wheelSpun = false;
+function buildWheel(){
+  const labelsEl = document.getElementById('wheelLabels');
+  labelsEl.innerHTML='';
+  const step = 360/wheelSegments.length;
+  wheelSegments.forEach((seg,i)=>{
+    const span = document.createElement('span');
+    span.style.setProperty('--ang', (step*i + step/2)+'deg');
+    span.textContent = seg.emoji;
+    labelsEl.appendChild(span);
+  });
+  document.getElementById('wheelResult').textContent='';
+  document.getElementById('wheel').style.transform='rotate(0deg)';
+  wheelSpun = false;
+  document.getElementById('spinBtn').disabled=false;
+  document.getElementById('spinBtn').textContent='Spin the Wheel';
+}
+
+document.getElementById('spinBtn').addEventListener('click', ()=>{
+  if(wheelSpun) return;
+  wheelSpun = true;
+  document.getElementById('spinBtn').disabled=true;
+  const step = 360/wheelSegments.length;
+  const adventureIndex = wheelSegments.findIndex(s=>s.label==='Adventure');
+  // land pointer (top) on the Adventure segment center, after several full spins
+  const targetAngle = 360*5 + (360 - (step*adventureIndex + step/2));
+  const wheel = document.getElementById('wheel');
+  wheel.style.transform = 'rotate('+targetAngle+'deg)';
+  setTimeout(()=>{
+    document.getElementById('wheelResult').textContent = "Looks like destiny chose... Adventure! ✨";
+    setTimeout(()=>{
+      showScreen('screen-adventure');
+      startAdventure();
+    }, 1600);
+  }, 4700);
+});
+
+/* ============ ADVENTURE ============ */
+const levels = ['level1','level2','level3','level4','bowling','boss'];
+let currentLevelIdx = 0;
+
+function updateProgress(){
+  const track = document.getElementById('progressTrack');
+  track.innerHTML='';
+  levels.forEach((l,i)=>{
+    const d = document.createElement('div');
+    d.className = 'progress-dot' + (i<currentLevelIdx ? ' done':'');
+    track.appendChild(d);
+  });
+}
+
+function startAdventure(){
+  currentLevelIdx = 0;
+  updateProgress();
+  renderLevel();
+}
+
+function nextLevel(){
+  currentLevelIdx++;
+  updateProgress();
+  if(currentLevelIdx >= levels.length){
+    showScreen('screen-ending');
+    runEnding();
+    return;
+  }
+  renderLevel();
+}
+
+function renderLevel(){
+  const container = document.getElementById('adventureContent');
+  container.innerHTML='';
+  const key = levels[currentLevelIdx];
+  if(key==='level1') buildLevel1(container);
+  if(key==='level2') buildLevel2(container);
+  if(key==='level3') buildLevel3(container);
+  if(key==='level4') buildLevel4(container);
+  if(key==='bowling') buildBowling(container);
+  if(key==='boss') buildBoss(container);
+}
+
+/* --- Level 1: Find the fish --- */
+function buildLevel1(container){
+  container.innerHTML = `
+    <h2>Level 1 🐟</h2>
+    <p class="subtitle">Find the real fish among its look-alikes!</p>
+    <div class="grid-objects" id="l1grid"></div>
+  `;
+  const grid = document.getElementById('l1grid');
+  const decoys = ['🐠','🐡','🦈','🐙','🦑','🐬'];
+  const correctPos = Math.floor(rand(0,12));
+  for(let i=0;i<12;i++){
+    const btn = document.createElement('button');
+    btn.textContent = i===correctPos ? '🐟' : pick(decoys);
+    btn.addEventListener('click', ()=>{
+      if(i===correctPos){
+        burstConfetti(40);
+        nextLevel();
+      } else {
+        btn.classList.add('wrong-shake');
+        setTimeout(()=>btn.classList.remove('wrong-shake'),400);
+      }
+    });
+    grid.appendChild(btn);
+  }
+}
+
+/* --- Level 2: Catch falling fish before the cat --- */
+function buildLevel2(container){
+  container.innerHTML = `
+    <h2>Level 2 🎣</h2>
+    <p class="subtitle">Catch 8 fish before the rival cat does!</p>
+    <div id="catchHUD"><span id="scoreYou">You: 0</span><span id="scoreCat">Cat: 0</span></div>
+    <div id="catchArea"><div id="rivalCat" style="left:0%;">🐈</div></div>
+  `;
+  const area = document.getElementById('catchArea');
+  const rival = document.getElementById('rivalCat');
+  let you=0, cat=0, over=false;
+  const target = 8;
+
+  function updateHUD(){
+    document.getElementById('scoreYou').textContent = 'You: '+you;
+    document.getElementById('scoreCat').textContent = 'Cat: '+cat;
+  }
+
+  function moveRivalTo(pct){
+    rival.style.left = Math.max(0,Math.min(88,pct))+'%';
+  }
+
+  const spawnTimer = setInterval(()=>{
+    if(over) return;
+    const f = document.createElement('div');
+    f.className='falling';
+    f.textContent='🐟';
+    const leftPct = rand(2,90);
+    f.style.left = leftPct+'%';
+    const fallTime = rand(2.6,4.2);
+    f.style.transition = `top ${fallTime}s linear`;
+    area.appendChild(f);
+    requestAnimationFrame(()=>{ f.style.top = (area.clientHeight-30)+'px'; });
+
+    let caught=false;
+    f.addEventListener('click', ()=>{
+      if(caught||over) return;
+      caught=true;
+      you++; updateHUD();
+      f.remove();
+      if(you>=target && !over){ over=true; endLevel2(true); }
+    });
+
+    // rival cat sometimes races to grab it first
+    const rivalWillTry = Math.random() < 0.35;
+    if(rivalWillTry){
+      setTimeout(()=>{
+        if(caught||over) return;
+        moveRivalTo(leftPct);
+        setTimeout(()=>{
+          if(caught||over) return;
+          caught=true;
+          cat++; updateHUD();
+          f.remove();
+          if(cat>=target && !over){ over=true; endLevel2(false); }
+        }, 500);
+      }, fallTime*1000*rand(0.4,0.75));
+    }
+
+    setTimeout(()=>{ if(f.parentNode) f.remove(); }, fallTime*1000+80);
+  }, 750);
+
+  function endLevel2(won){
+    clearInterval(spawnTimer);
+    Array.from(area.querySelectorAll('.falling')).forEach(f=>f.remove());
+    setTimeout(()=>{
+      if(won){ burstConfetti(50); nextLevel(); }
+      else {
+        // gentle retry rather than a dead end
+        container.querySelector('#catchHUD').insertAdjacentHTML('beforeend','');
+        const msg = document.createElement('p');
+        msg.textContent = "The cat got there first — try again!";
+        container.appendChild(msg);
+        setTimeout(()=>buildLevel2(container), 1300);
+      }
+    }, 300);
+  }
+}
+
+/* --- Level 3: Which cat is sleeping? --- */
+function buildLevel3(container){
+  container.innerHTML = `
+    <h2>Level 3 😴</h2>
+    <p class="subtitle">Which cat is sleeping?</p>
+    <div class="grid-objects" id="l3grid"></div>
+  `;
+  const grid = document.getElementById('l3grid');
+  const awake = ['😺','😸','😻','😼'];
+  const correctPos = Math.floor(rand(0,9));
+  for(let i=0;i<9;i++){
+    const btn = document.createElement('button');
+    btn.textContent = i===correctPos ? '😴' : pick(awake);
+    btn.addEventListener('click', ()=>{
+      if(i===correctPos){
+        burstConfetti(40);
+        nextLevel();
+      } else {
+        btn.classList.add('wrong-shake');
+        setTimeout(()=>btn.classList.remove('wrong-shake'),400);
+      }
+    });
+    grid.appendChild(btn);
+  }
+}
+
+/* --- Level 4: Mini maze --- */
+function buildLevel4(container){
+  container.innerHTML = `
+    <h2>Level 4 🧭</h2>
+    <p class="subtitle">Guide the cat to the flag! Use arrow keys (or the buttons).</p>
+    <div id="mazeGrid"></div>
+    <div style="margin-top:10px;">
+      <button class="btn secondary" id="mUp">⬆️</button><br>
+      <button class="btn secondary" id="mLeft">⬅️</button>
+      <button class="btn secondary" id="mDown">⬇️</button>
+      <button class="btn secondary" id="mRight">➡️</button>
+    </div>
+  `;
+  // 0 = open, 1 = wall
+  const layout = [
+    [0,0,1,0,0,0],
+    [1,0,1,0,1,0],
+    [0,0,0,0,1,0],
+    [0,1,1,1,1,0],
+    [0,0,0,0,0,0],
+    [1,1,1,1,1,0]
+  ];
+  let player = {r:0,c:0};
+  const goal = {r:5,c:5};
+  const gridEl = document.getElementById('mazeGrid');
+  gridEl.style.gridTemplateColumns = `repeat(${layout[0].length}, 34px)`;
+
+  function render(){
+    gridEl.innerHTML='';
+    for(let r=0;r<layout.length;r++){
+      for(let c=0;c<layout[0].length;c++){
+        const cell = document.createElement('div');
+        let cls='maze-cell';
+        if(layout[r][c]===1) cls+=' maze-wall';
+        if(r===goal.r && c===goal.c) cls+=' maze-goal';
+        if(r===player.r && c===player.c) cls+=' maze-player';
+        cell.className=cls;
+        if(r===player.r && c===player.c) cell.textContent='🐈';
+        else if(r===goal.r && c===goal.c) cell.textContent='🚩';
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+  function tryMove(dr,dc){
+    const nr = player.r+dr, nc = player.c+dc;
+    if(nr<0||nc<0||nr>=layout.length||nc>=layout[0].length) return;
+    if(layout[nr][nc]===1) return;
+    player = {r:nr,c:nc};
+    render();
+    if(player.r===goal.r && player.c===goal.c){
+      burstConfetti(40);
+      document.removeEventListener('keydown', keyHandler);
+      setTimeout(nextLevel, 500);
+    }
+  }
+  function keyHandler(e){
+    if(e.key==='ArrowUp') tryMove(-1,0);
+    if(e.key==='ArrowDown') tryMove(1,0);
+    if(e.key==='ArrowLeft') tryMove(0,-1);
+    if(e.key==='ArrowRight') tryMove(0,1);
+  }
+  document.addEventListener('keydown', keyHandler);
+  document.getElementById('mUp').addEventListener('click', ()=>tryMove(-1,0));
+  document.getElementById('mDown').addEventListener('click', ()=>tryMove(1,0));
+  document.getElementById('mLeft').addEventListener('click', ()=>tryMove(0,-1));
+  document.getElementById('mRight').addEventListener('click', ()=>tryMove(0,1));
+  render();
+}
+
+/* --- Bowling level: knock down the pins --- */
+function buildBowling(container){
+  container.innerHTML = `
+    <h2>Bowling Lane 🎳</h2>
+    <p class="subtitle">Line up your shot, then bowl for a strike!</p>
+    <div id="bowlLane">
+      <div id="bowlBall">🔵</div>
+    </div>
+    <div id="bowlScore"></div>
+    <div id="bowlControls">
+      <button class="btn secondary" id="bowlLeft">⬅️</button>
+      <button class="btn" id="bowlRoll">Bowl! 🎳</button>
+      <button class="btn secondary" id="bowlRight">➡️</button>
+    </div>
+  `;
+  const lane = document.getElementById('bowlLane');
+  const ball = document.getElementById('bowlBall');
+  const scoreEl = document.getElementById('bowlScore');
+  let ballPct = 50;
+  let rolling = false;
+  let rollCount = 0;
+
+  // pin layout: classic triangle, percentages across lane width / down from top
+  const pinDefs = [
+    {px:50, py:8},
+    {px:38, py:16},{px:62, py:16},
+    {px:26, py:24},{px:50, py:24},{px:74, py:24},
+    {px:14, py:32},{px:38, py:32},{px:62, py:32},{px:86, py:32}
+  ];
+
+  function renderPins(){
+    lane.querySelectorAll('.pin').forEach(p=>p.remove());
+    pinDefs.forEach((p,i)=>{
+      const el = document.createElement('div');
+      el.className='pin';
+      el.dataset.idx = i;
+      el.dataset.down = '0';
+      el.style.setProperty('--px', p.px+'%');
+      el.style.setProperty('--py', p.py+'%');
+      el.textContent='🎳';
+      lane.appendChild(el);
+    });
+  }
+  renderPins();
+
+  function updateScore(){
+    const down = lane.querySelectorAll('.pin.down').length;
+    scoreEl.textContent = down+' / '+pinDefs.length+' pins down';
+    return down;
+  }
+  updateScore();
+
+  function moveBall(pct){
+    ballPct = Math.max(6, Math.min(94, pct));
+    ball.style.left = ballPct+'%';
+  }
+  document.getElementById('bowlLeft').addEventListener('click', ()=>{ if(!rolling) moveBall(ballPct-6); });
+  document.getElementById('bowlRight').addEventListener('click', ()=>{ if(!rolling) moveBall(ballPct+6); });
+
+  document.getElementById('bowlRoll').addEventListener('click', ()=>{
+    if(rolling) return;
+    rolling = true;
+    rollCount++;
+    document.getElementById('bowlRoll').disabled = true;
+    ball.style.bottom = '86%';
+    setTimeout(()=>{
+      const radius = 14 + (rollCount-1)*6;
+      lane.querySelectorAll('.pin').forEach(p=>{
+        if(p.dataset.down==='1') return;
+        const px = parseFloat(p.style.getPropertyValue('--px'));
+        if(Math.abs(px-ballPct) < radius){
+          p.dataset.down='1';
+          p.classList.add('down');
+        }
+      });
+      const down = updateScore();
+      burstConfetti(down*4, lane);
+      setTimeout(()=>{
+        if(down >= 7 || rollCount >= 3){
+          burstConfetti(50);
+          nextLevel();
+        } else {
+          const msg = document.createElement('p');
+          msg.textContent = "Nice roll! One more to clear the rest.";
+          container.appendChild(msg);
+          setTimeout(()=>{
+            msg.remove();
+            ball.style.bottom='6%';
+            rolling=false;
+            document.getElementById('bowlRoll').disabled=false;
+          }, 1300);
+        }
+      }, 500);
+    }, 1150);
+  });
+}
+
+/* --- Boss level: help kitten reach the cake --- */
+function buildBoss(container){
+  container.innerHTML = `
+    <h2>Boss 🏆</h2>
+    <p class="subtitle">Help the kitten reach the birthday cake! Tap "Hop" to dodge the paw prints.</p>
+    <div id="bossArea">
+      <div id="kitten">🐈</div>
+      <div id="bossCake">🎂</div>
+    </div>
+    <button class="btn" id="hopBtn">Hop! 🐾</button>
+  `;
+  const area = document.getElementById('bossArea');
+  const kitten = document.getElementById('kitten');
+  let posPct = 4;
+  let hopping = false;
+  let alive = true;
+
+  const moveTimer = setInterval(()=>{
+    if(!alive) return;
+    posPct = Math.min(80, posPct + 2.2);
+    kitten.style.left = posPct+'%';
+    if(posPct >= 80){
+      alive=false;
+      clearInterval(moveTimer);
+      clearInterval(obsTimer);
+      burstConfetti(60);
+      setTimeout(nextLevel, 700);
+    }
+  }, 260);
+
+  const obsTimer = setInterval(()=>{
+    if(!alive) return;
+    const ob = document.createElement('div');
+    ob.className='obstacle';
+    ob.textContent='🐾';
+    ob.style.right='0%';
+    ob.style.transition='right 1.6s linear';
+    area.appendChild(ob);
+    requestAnimationFrame(()=>{ ob.style.right='100%'; });
+    setTimeout(()=>{
+      // check collision with kitten roughly around mid-path
+      const kittenRect = kitten.getBoundingClientRect();
+      const obRect = ob.getBoundingClientRect();
+      const overlap = !(kittenRect.right < obRect.left || kittenRect.left > obRect.right);
+      if(overlap && alive && !hopping){
+        posPct = Math.max(4, posPct - 6);
+        kitten.style.left = posPct+'%';
+      }
+      ob.remove();
+    }, 800);
+    setTimeout(()=>{ if(ob.parentNode) ob.remove(); }, 1650);
+  }, 900);
+
+  document.getElementById('hopBtn').addEventListener('click', ()=>{
+    if(hopping || !alive) return;
+    hopping = true;
+    kitten.style.transform='translateY(-30px)';
+    setTimeout(()=>{ kitten.style.transform='translateY(0)'; hopping=false; }, 350);
+  });
+}
+
+/* ============ ENDING ============ */
+function runEnding(){
+  const ending = document.getElementById('screen-ending');
+  ending.innerHTML = ending.innerHTML; // no-op keep structure
+  // rebuild stars
+  const old = ending.querySelectorAll('.star');
+  old.forEach(s=>s.remove());
+  for(let i=0;i<50;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const size = rand(1,3);
+    s.style.width=size+'px'; s.style.height=size+'px';
+    s.style.left = rand(0,100)+'vw';
+    s.style.top = rand(0,100)+'vh';
+    s.style.animationDelay = rand(0,2)+'s';
+    ending.appendChild(s);
+  }
+  document.getElementById('endCat').style.opacity=0;
+  document.getElementById('endLine').style.opacity=0;
+  document.getElementById('endHeart').classList.remove('show');
+  document.getElementById('bigBirthday').classList.remove('show');
+  const letterBox = document.getElementById('letterBox');
+  letterBox.classList.remove('show');
+  letterBox.textContent='';
+
+  document.getElementById('endCat').style.animation='none';
+  void document.getElementById('endCat').offsetWidth;
+  document.getElementById('endCat').style.animation='';
+
+  setTimeout(()=>{ document.getElementById('endLine').style.transition='opacity 0.8s'; document.getElementById('endLine').style.opacity=1; }, 1200);
+  setTimeout(()=>{ document.getElementById('endHeart').classList.add('show'); }, 2200);
+  setTimeout(()=>{
+    document.getElementById('bigBirthday').classList.add('show');
+    fireworksShow(8, ending);
+    burstConfetti(90, ending);
+    spawnHearts(20, ending);
+  }, 3400);
+  setTimeout(()=>{
+    letterBox.classList.add('show');
+    typewriteLetter(letterBox, letterText);
+  }, 4600);
+}
+
+const letterText = `Dear Riruru,
+
+Youre gonna be 17 on 17th thats so coolll, i cant process the fact that youre gonna be 17, time really went so fast that it still feels like it was just yesterday when we met but i really am glad that we both chose to be each others friend which ofcourse upgraded to being best friends thanks to your consistency and my patience? am i being cocky mb mb but yeaa i love the energy that u bring in the conversations and my life ofc and the way u share things even tiniest of the details u might think thats clingy but its not just be like that its what makes you you.
+
+The riruru ik, the aarohi ik, the tia ik, the meow ik, the dumboobs ik — wow so many names to call u but the fact that amaze amaze me is i just cant get enough of u, you are what makes the sky vast and endless so just be there cuz i love to annoy you and spend time with you.
+
+I hope that u achieve your goals which ik u will, just keep doin what youre doin, you are doing a fantastic job aarohi. and yea i really envy you that youre celebrating 17 on the 17th so make sure u enjoy it to the fullest and dont drink cold water dumb.
+
+have fun sucker`;
+
+function typewriteLetter(el, text){
+  el.textContent='';
+  let i=0;
+  function step(){
+    if(i<=text.length){
+      el.textContent = text.slice(0,i);
+      i++;
+      setTimeout(step, 22);
+    }
+  }
+  step();
+}
+
+/* ============ EASTER EGGS ============ */
+
+// Press "7" -> rainbow mode
+// Press "c" -> cat rain
+// Shift+R -> Riruru Mode
+document.addEventListener('keydown', (e)=>{
+  if(e.key === '7'){
+    stage.classList.toggle('rainbow-mode');
+  }
+  if(e.key === 'c' || e.key==='C'){
+    catRain();
+  }
+  if(e.shiftKey && (e.key==='R' || e.key==='r')){
+    stage.classList.toggle('riruru-mode');
+    if(stage.classList.contains('riruru-mode')){
+      startRirurusparkles();
+    } else {
+      stopRirurusparkles();
+    }
+  }
+});
+
+function catRain(){
+  const cats = ['😹','🐈','😻','🐱'];
+  for(let i=0;i<26;i++){
+    setTimeout(()=>{
+      const c = document.createElement('div');
+      c.className='cat-rain-item';
+      c.textContent = pick(cats);
+      c.style.left = rand(0,96)+'vw';
+      c.style.animationDuration = rand(2,3.6)+'s';
+      stage.appendChild(c);
+      setTimeout(()=>c.remove(), 3800);
+    }, i*60);
+  }
+}
+
+let rirurusparkleHandler=null;
+function startRirurusparkles(){
+  rirurusparkleHandler = (e)=>{
+    const s = document.createElement('div');
+    s.className='riruru-sparkle';
+    s.textContent = pick(['✨','💫','🌸','⭐']);
+    s.style.left = e.clientX+'px';
+    s.style.top = e.clientY+'px';
+    stage.appendChild(s);
+    setTimeout(()=>s.remove(), 1000);
+  };
+  document.addEventListener('mousemove', rirurusparkleHandler);
+}
+function stopRirurusparkles(){
+  if(rirurusparkleHandler) document.removeEventListener('mousemove', rirurusparkleHandler);
+}
+
+// Click the moon -> cat meows
+document.getElementById('moonEl').addEventListener('click', ()=>{
+  playMeow();
+});
+function playMeow(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  audioCtx.resume();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type='sawtooth';
+  o.connect(g); g.connect(audioCtx.destination);
+  const t = audioCtx.currentTime;
+  o.frequency.setValueAtTime(600, t);
+  o.frequency.exponentialRampToValueAtTime(300, t+0.18);
+  o.frequency.exponentialRampToValueAtTime(500, t+0.32);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.12, t+0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+0.4);
+  o.start(t); o.stop(t+0.42);
+}
+
+// Click the cake -> candles light
+document.getElementById('homeCake').addEventListener('click', lightCandles);
+function lightCandles(el){
+  const cakeEl = document.getElementById('homeCake');
+  if(cakeEl.dataset.lit==='1') return;
+  cakeEl.dataset.lit='1';
+  cakeEl.innerHTML = '🕯️<span class="flame">🔥</span>🎂';
+  setTimeout(()=>{ cakeEl.dataset.lit=''; cakeEl.textContent='🎂'; }, 3500);
+}
+
+</script>
+</body>
+</html>
